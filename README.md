@@ -24,7 +24,7 @@ The figure scripts contain the complete fitted parameter settings.  The paramete
 | Dimension | Two-parameter model `(a,b)` | Three-parameter model `(a,b,c)` |
 | --- | --- | --- |
 | 2-D | `(3.5692, 3.5692)` | `(3.31605, 3.03689, 1.07871)` |
-| 3-D | `(5.5856, 5.5856)` | `(4.828, 4.097, 1.160)` |
+| 3-D | `(5.5856, 5.5856)` | `(4.828, 4.069, 1.160)` |
 
 The empirical-data settings in `get_area_volume.m` are:
 
