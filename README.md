@@ -37,7 +37,9 @@ The empirical-data settings in `get_area_volume.m` are:
 
 The value `lambda = 1` is defined in `areas.m` and `volumes.m`; the remaining simulation settings are defined in `get_area_volume.m`.
 
-Each realization is generated in an extended guard window. The code retains a cell only when its nucleus lies in the nominal observation window, the cell is bounded, and all of its vertices lie strictly inside the extended window. With guard ratio `0.6`, the extended windows are `[-120,320]^2` for the 2-D simulation and `[-12,32]^3` for the 3-D simulation. The implementation fixes the number of uniformly distributed nuclei at `round(lambda * extended-window measure)`, which is the fixed-count (binomial) approximation to a homogeneous PPP used for these simulations.
+Each realization is generated in an extended guard window. The code retains a cell only when its nucleus lies in the nominal observation window, the cell is bounded, and all of its vertices lie strictly inside the extended window. With guard ratio `0.6`, the extended windows are `[-120,320]^2` for the 2-D simulation and `[-12,32]^3` for the 3-D simulation. For each realization, the number of nuclei is sampled as `N = poissrnd(lambda * extended-window measure)`, and the `N` nuclei are independently and uniformly distributed in the extended window. This is the finite-window construction of a homogeneous PPP.
+
+The simulated cell areas and volumes are normalized by the theoretical Poisson--Voronoi mean, `1/lambda`, rather than by an empirical sample mean. Because the supplied simulations use `lambda = 1`, the retained raw areas and volumes are already the unit-mean normalized variables used by the PDF plots; the plotting scripts therefore do not apply an additional normalization.
 
 In the primary reproduction script, `main_MX.m`, the empirical PDFs are constructed with 400 histogram bins in both dimensions and `Normalization` set to `pdf`. The alternative `main.m` configuration uses 200 bins for the 2-D data and 400 bins for the 3-D data.
 

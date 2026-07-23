@@ -23,8 +23,8 @@ lambda = 1;
 
 Wext_area = (Wext_xmax - Wext_xmin) * (Wext_ymax - Wext_ymin);
 
-% 用确定点数代替 Poisson 抽样，提高稳定性
-N = round(lambda * Wext_area);
+% PPP point count: N ~ Poisson(lambda * |Wext|)
+N = poissrnd(lambda * Wext_area);
 
 x = Wext_xmin + (Wext_xmax - Wext_xmin) * rand(N,1);
 y = Wext_ymin + (Wext_ymax - Wext_ymin) * rand(N,1);
