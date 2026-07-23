@@ -5,6 +5,7 @@ This repository contains the MATLAB scripts and numerical data required to repro
 ## Software requirements
 
 - **MATLAB R2025a** (tested version).
+- **Statistics and Machine Learning Toolbox** is required for `poissrnd`, which generates the Poisson-distributed PPP point count in the simulation scripts.
 - **Optimization Toolbox** is required only to re-estimate the fitted parameters with the quasi-Newton `fminunc` routine in `solve_abc.m`. The simulation and plotting scripts otherwise use standard MATLAB functions, including `delaunayTriangulation`, `voronoiDiagram`, `voronoin`, and `convhull`.
 
 ## Repository contents
