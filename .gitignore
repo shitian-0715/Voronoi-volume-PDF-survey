@@ -1,0 +1,10 @@
+# MATLAB editor and autosave files
+*.asv
+*.m~
+
+# MATLAB crash and temporary files
+crash_dump.*
+*.tmp
+
+# IDE settings
+.idea/

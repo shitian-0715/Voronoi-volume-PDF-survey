@@ -1,5 +1,9 @@
 clc; clear;
 
+% Keep all helper functions available when launched from the project root.
+scriptDir = fileparts(mfilename('fullpath'));
+addpath(scriptDir);
+
 guard_ratio = 0.6;
 num_realizations = 4000;
 valid_areas = [];

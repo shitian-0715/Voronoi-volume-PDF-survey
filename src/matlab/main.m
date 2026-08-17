@@ -1,5 +1,15 @@
 clc; clear; close all;
 
+% Resolve project paths so this script can be launched from any MATLAB folder.
+scriptDir = fileparts(mfilename('fullpath'));
+projectRoot = fileparts(fileparts(scriptDir));
+dataDir = fullfile(projectRoot, 'data');
+figuresDir = fullfile(projectRoot, 'figures', 'reproduced');
+addpath(scriptDir);
+if ~isfolder(figuresDir)
+    mkdir(figuresDir);
+end
+
 %% ===================== 参数区 =====================
 % 二维参数
 a21 = 3.3095;  b21 = 3.0328;   c21 = 1.0787;
@@ -46,9 +56,9 @@ d3 = 3;
 % 
 % valid_volumes = volumes(A_xmin, A_xmax, A_ymin, A_ymax, A_zmin, A_zmax, guard_ratio);
 
-load('valid_areas.mat',   'valid_areas');
+load(fullfile(dataDir, 'valid_areas.mat'), 'valid_areas');
 
-load('valid_volumes.mat', 'valid_volumes');
+load(fullfile(dataDir, 'valid_volumes.mat'), 'valid_volumes');
 
 %% ===================== 全局绘图风格（IEEE） =====================
 set(groot, 'defaultAxesFontName', 'Times New Roman');
@@ -88,7 +98,7 @@ set(figA,'PaperUnits','centimeters','PaperPosition',[0 0 figW figH]);
 
 ax1 = axes('Parent',figA); hold(ax1,'on'); box(ax1,'on'); grid(ax1,'on');
 
-[counts1, edges1] = histcounts(valid_areas, 5000, 'Normalization','pdf');
+[counts1, edges1] = histcounts(valid_areas, 200, 'Normalization','pdf');  %bin 5000
 bin_centers1 = (edges1(1:end-1) + edges1(2:end))/2;
 scatter(ax1, bin_centers1, counts1, msz, ...
     'MarkerFaceColor','none', 'MarkerEdgeColor',[0 0 1], 'DisplayName','Empirical');
@@ -165,8 +175,8 @@ ax1_in.GridAlpha = 0.15;
 % ax1_tail.GridAlpha = 0.15;
 
 % 导出 (a)
-print(figA, '-depsc', '-painters', 'voronoi_pdf_2d.eps');
-print(figA, '-dpdf',  '-painters', 'voronoi_pdf_2d.pdf');
+print(figA, '-depsc', '-painters', fullfile(figuresDir, 'Fig-Voronoi_PDF_2D.eps'));
+print(figA, '-dpdf',  '-painters', fullfile(figuresDir, 'Fig-Voronoi_PDF_2D.pdf'));
 
 %% ===================== 图 (b)：3D 体积（独立文件） =====================
 figB = figure('Units','centimeters','Position',[2 2 figW figH]);
@@ -174,7 +184,7 @@ set(figB,'PaperUnits','centimeters','PaperPosition',[0 0 figW figH]);
 
 ax2 = axes('Parent',figB); hold(ax2,'on'); box(ax2,'on'); grid(ax2,'on');
 
-[counts2, edges2] = histcounts(valid_volumes, 5000, 'Normalization','pdf');
+[counts2, edges2] = histcounts(valid_volumes, 400, 'Normalization','pdf'); % bin 5000
 bin_centers2 = (edges2(1:end-1) + edges2(2:end))/2;
 scatter(ax2, bin_centers2, counts2, msz, ...
     'MarkerFaceColor','none', 'MarkerEdgeColor',[0 0 1], 'DisplayName','Empirical');
@@ -245,8 +255,8 @@ ax2_in.GridAlpha = 0.15;
 % ax2_tail.GridAlpha = 0.15;
 
 % 导出 (b)
-print(figB, '-depsc', '-painters', 'voronoi_pdf_3d.eps');
-print(figB, '-dpdf',  '-painters', 'voronoi_pdf_3d.pdf');
+print(figB, '-depsc', '-painters', fullfile(figuresDir, 'Fig-Voronoi_PDF_3D.eps'));
+print(figB, '-dpdf',  '-painters', fullfile(figuresDir, 'Fig-Voronoi_PDF_3D.pdf'));
 
 %% ===================== 图 (c)：2D 拖尾（独立文件） =====================
 
@@ -283,8 +293,8 @@ axC.GridAlpha = 0.15;
 legend(axC,'show','FontSize',fs_legend,'Location','northeast');
 set(gca,'Box','on');
 
-print(figC, '-depsc', '-painters', 'voronoi_tail_2d.eps');
-print(figC, '-dpdf',  '-painters', 'voronoi_tail_2d.pdf');
+print(figC, '-depsc', '-painters', fullfile(figuresDir, 'voronoi_tail_2d.eps'));
+print(figC, '-dpdf',  '-painters', fullfile(figuresDir, 'voronoi_tail_2d.pdf'));
 
 %% ===================== 图 (d)：3D 拖尾（独立文件） =====================
 
@@ -318,5 +328,5 @@ axD.GridAlpha = 0.15;
 
 legend(axD,'show','FontSize',fs_legend,'Location','northeast');
 
-print(figD, '-depsc', '-painters', 'voronoi_tail_3d.eps');
-print(figD, '-dpdf',  '-painters', 'voronoi_tail_3d.pdf');
+print(figD, '-depsc', '-painters', fullfile(figuresDir, 'voronoi_tail_3d.eps'));
+print(figD, '-dpdf',  '-painters', fullfile(figuresDir, 'voronoi_tail_3d.pdf'));
