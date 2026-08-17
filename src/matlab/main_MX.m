@@ -1,5 +1,15 @@
 clc; clear; close all;
 
+% Resolve project paths so this script can be launched from any MATLAB folder.
+scriptDir = fileparts(mfilename('fullpath'));
+projectRoot = fileparts(fileparts(scriptDir));
+dataDir = fullfile(projectRoot, 'data');
+figuresDir = fullfile(projectRoot, 'figures', 'reproduced');
+addpath(scriptDir);
+if ~isfolder(figuresDir)
+    mkdir(figuresDir);
+end
+
 
 %% ===================== 参数区 =====================
 % 二维参数
@@ -40,9 +50,9 @@ d3 = 3;
 % M = 1;
 % valid_areas = area_fast(L, inner_ratio, M);
 
-load('valid_areas.mat',   'valid_areas');
+load(fullfile(dataDir, 'valid_areas.mat'), 'valid_areas');
 
-load('valid_volumes.mat', 'valid_volumes');
+load(fullfile(dataDir, 'valid_volumes.mat'), 'valid_volumes');
 
 %% ===================== 全局绘图风格（IEEE） =====================
 set(groot, 'defaultAxesFontName', 'Times New Roman');
@@ -51,7 +61,7 @@ set(groot, 'defaultTextFontName', 'Times New Roman');
 lw  = 1.5;          % 线宽
 msz = 10;           % 散点尺寸
 fs_label  = 10;     % 轴标签字号
-fs_legend = 7;      % 图例字号
+fs_legend = 6;      % 图例字号
 
 % 单栏尺寸（IEEE 双栏文章的单栏宽度 ≈ 8.8 cm）
 figW = 8.8;         % cm
@@ -60,10 +70,10 @@ figH = 7.5;         % cm（可调到 7.0–7.5）6.8
 %% ===================== 样式表（Map，键可含空格） =====================
 styles = containers.Map('KeyType','char','ValueType','any');
 styles('Hinde and Miles') = struct('LineStyle','-',  'Marker','none', 'Color',[0.00 0.45 0.74]);
-styles('Tanemura')        = struct('LineStyle','--', 'Marker','none', 'Color',[0.47 0.67 0.19]);
+styles('Tanemura')        = struct('LineStyle','--', 'Marker','none', 'Color',[0.85 0.33 0.10]);
 styles('Weaire et al')          = struct('LineStyle',':',  'Marker','none', 'Color',[0.93 0.69 0.13]);
 styles('DiCenzo and Wertheim')         = struct('LineStyle','-.', 'Marker','none', 'Color',[0.49 0.18 0.56]);
-styles('Ferenc and Neda')          = struct('LineStyle','--', 'Marker','none', 'Color',[0.85 0.33 0.10]);
+styles('Ferenc and Neda')          = struct('LineStyle','--', 'Marker','none', 'Color',[0.47 0.67 0.19]);
 styles('Proposed (TG)')           = struct('LineStyle','-',  'Marker','none', 'Color',[0.30 0.75 0.93]);
 styles('Proposed (GG)')           = struct('LineStyle',':',  'Marker','none', 'Color',[1 0 0]);
 styles('Kiang')           = struct('LineStyle','-.', 'Marker','none', 'Color',[0.00 0.00 0.00]);
@@ -132,73 +142,37 @@ ylim(ax1_in,[0.82 0.87]);
 set(ax1_in,'TickDir','in','LineWidth',1,'FontSize',8);
 ax1_in.GridAlpha = 0.15;
 
-% ====== 拖尾误差图（2D - log误差） ======
-
-tail_min = 3.2;
-tail_max = 3.8;
-
-tail_idx = (bin_centers1 > tail_min & bin_centers1 < tail_max);
-
-y_tail   = bin_centers1(tail_idx);
-emp_tail = counts1(tail_idx);
-
-valid = emp_tail > 0 & ~isnan(emp_tail) & ~isinf(emp_tail);
-y_tail   = y_tail(valid);
-emp_tail = emp_tail(valid);
-
-log_emp = log(emp_tail);
-
-% inset 位置保持原结构
-h_tail1 = 0.22 * pos1(4);
+% ====== 拖尾局部图（2D） ======
+h_tail1 = 0.22 * pos1(4);     % 高度略小
 w_tail1 = 0.42 * pos1(3);
 
 x_tail1 = pos1(1) + 0.50 * pos1(3);
-y_tail1 = pos1(2) + 0.08 * pos1(4);
+y_tail1 = pos1(2) + 0.06 * pos1(4);    
 
 ax1_tail = axes('Position',[x_tail1, y_tail1, w_tail1, h_tail1]);
 hold(ax1_tail,'on'); box(ax1_tail,'on'); grid(ax1_tail,'on');
 
-model_names = { ...
-    'Hinde and Miles', ...
-    'Tanemura', ...
-    'Weaire et al', ...
-    'DiCenzo and Wertheim', ...
-    'Ferenc and Neda', ...
-    'Proposed (TG)', ...
-    'Proposed (GG)'};
+scatter(ax1_tail, bin_centers1, counts1, msz, ...
+    'MarkerFaceColor','none','MarkerEdgeColor',[0 0 1]);
 
-x_models = {x1, x2, x3, x4, x5, x1_2d, x2_2d};
-y_models = {y1, y2, y3, y4, y5, y1_2d, y2_2d};
+plotStyled(ax1_tail, x1,     y1,     'Hinde and Miles',1.0);
+plotStyled(ax1_tail, x2,     y2,     'Tanemura',1.0);
+plotStyled(ax1_tail, x3,     y3,     'Weaire et al',1.0);
+plotStyled(ax1_tail, x4,     y4,     'DiCenzo and Wertheim',1.0);
+plotStyled(ax1_tail, x5,     y5,     'Ferenc and Neda',1.0);
+plotStyled(ax1_tail, x1_2d,  y1_2d,  'Proposed (TG)',1.0);
+plotStyled(ax1_tail, x2_2d,  y2_2d,  'Proposed (GG)',1.0);
 
-window = 15;
-
-for k = 1:length(model_names)
-
-    f_model = interp1(x_models{k}, y_models{k}, y_tail, 'linear');
-    valid_model = f_model > 0;
-
-    err = log(f_model(valid_model)) - log_emp(valid_model);
-    y_plot = y_tail(valid_model);
-
-    err_smooth = movmean(err, window);
-
-    plot(ax1_tail, y_plot, err_smooth, ...
-        'LineStyle', styles(model_names{k}).LineStyle, ...
-        'Color',     styles(model_names{k}).Color, ...
-        'LineWidth', 1.0);
-end
-
-% yline(ax1_tail,0,'k--','LineWidth',1);
-
-% xlabel(ax1_tail,'$v$','Interpreter','latex','FontSize',8);
-ylabel(ax1_tail,'Log error','FontSize',6);
+% ====== 设置拖尾放大范围（右尾） ======
+xlim(ax1_tail,[4.0 4.2]);
+ylim(ax1_tail,[1e-4 8e-4]);
 
 set(ax1_tail,'TickDir','in','LineWidth',1,'FontSize',8);
 ax1_tail.GridAlpha = 0.15;
 
 % 导出 (a)
-print(figA, '-depsc', '-painters', 'Fig-Voronoi_PDF_2D.eps');
-print(figA, '-dpdf',  '-painters', 'Fig-Voronoi_PDF_2D.pdf');
+print(figA, '-depsc', '-painters', fullfile(figuresDir, 'Fig-Voronoi_PDF_2D.eps'));
+print(figA, '-dpdf',  '-painters', fullfile(figuresDir, 'Fig-Voronoi_PDF_2D.pdf'));
 
 %% ===================== 图 (b)：3D 体积（独立文件） =====================
 figB = figure('Units','centimeters','Position',[2 2 figW figH]);
@@ -252,67 +226,33 @@ ylim(ax2_in,[0.9 1.06]);
 set(ax2_in,'TickDir','in','LineWidth',1,'FontSize',8);
 ax2_in.GridAlpha = 0.15;
 
-% ====== 拖尾误差图（3D - log误差） ======
-
-tail_min = 3.0;
-tail_max = 3.6;
-
-tail_idx = (bin_centers2 > tail_min & bin_centers2 < tail_max);
-
-y_tail   = bin_centers2(tail_idx);
-emp_tail = counts2(tail_idx);
-
-valid = emp_tail > 0 & ~isnan(emp_tail) & ~isinf(emp_tail);
-y_tail   = y_tail(valid);
-emp_tail = emp_tail(valid);
-
-log_emp = log(emp_tail);
-
-h_tail2 = 0.22 * pos2(4);
+% ====== 拖尾局部图（3D） ======
+h_tail2 = 0.22 * pos2(4);     % 高度略小
 w_tail2 = 0.42 * pos2(3);
 
 x_tail2 = pos2(1) + 0.50 * pos2(3);
-y_tail2 = pos2(2) + 0.08 * pos2(4);
+y_tail2 = pos2(2) + 0.06 * pos2(4);    % 在峰值 inset 上方
 
 ax2_tail = axes('Position',[x_tail2, y_tail2, w_tail2, h_tail2]);
 hold(ax2_tail,'on'); box(ax2_tail,'on'); grid(ax2_tail,'on');
 
-model_names3 = { ...
-    'Tanemura', ...
-    'Kiang', ...
-    'Ferenc and Neda', ...
-    'Proposed (TG)', ...
-    'Proposed (GG)'};
+scatter(ax2_tail, bin_centers2, counts2, msz, ...
+     'MarkerFaceColor','none','MarkerEdgeColor',[0 0 1]);
 
-x_models3 = {x6, x7, x8, x_3d, x2_3d};
-y_models3 = {y6, y7, y8, y_3d, y2_3d};
+plotStyled(ax2_tail, x6,     y6,     'Tanemura',1.0);
+plotStyled(ax2_tail, x7,     y7,     'Kiang',1.0);
+plotStyled(ax2_tail, x8,     y8,     'Ferenc and Neda',1.0);
+plotStyled(ax2_tail, x_3d,   y_3d,   'Proposed (TG)',1.0);
+plotStyled(ax2_tail, x2_3d,  y2_3d,  'Proposed (GG)',1.0);
 
-window = 15;
+% ====== 拖尾范围 ======
+xlim(ax2_tail,[3.0 3.2]);
+ylim(ax2_tail,[1e-4 5e-3]);
 
-for k = 1:length(model_names3)
-
-    f_model = interp1(x_models3{k}, y_models3{k}, y_tail, 'linear');
-    valid_model = f_model > 0;
-
-    err = log(f_model(valid_model)) - log_emp(valid_model);
-    y_plot = y_tail(valid_model);
-
-    err_smooth = movmean(err, window);
-
-    plot(ax2_tail, y_plot, err_smooth, ...
-        'LineStyle', styles(model_names3{k}).LineStyle, ...
-        'Color',     styles(model_names3{k}).Color, ...
-        'LineWidth', 1.0);
-end
-
-% yline(ax2_tail,0,'k--','LineWidth',1);
-
-% xlabel(ax2_tail,'$v$','Interpreter','latex','FontSize',8);
-ylabel(ax2_tail,'Log error','FontSize',6);
 
 set(ax2_tail,'TickDir','in','LineWidth',1,'FontSize',8);
 ax2_tail.GridAlpha = 0.15;
 
 % 导出 (b)
-print(figB, '-depsc', '-painters', 'Fig-Voronoi_PDF_3D.eps');
-print(figB, '-dpdf',  '-painters', 'Fig-Voronoi_PDF_3D.pdf');
+print(figB, '-depsc', '-painters', fullfile(figuresDir, 'Fig-Voronoi_PDF_3D.eps'));
+print(figB, '-dpdf',  '-painters', fullfile(figuresDir, 'Fig-Voronoi_PDF_3D.pdf'));
